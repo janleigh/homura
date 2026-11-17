@@ -33,6 +33,7 @@ import type { LoopOption } from "riffy";
 		"HasActivePlayerPrecondition",
 		"InVoiceChannelPrecondition",
 		"SameVoiceChannelPrecondition",
+		"DJPrecondition",
 	],
 })
 export class LoopCommand extends Command {

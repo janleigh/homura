@@ -41,6 +41,7 @@ import type { Track } from "riffy";
 	preconditions: [
 		"InVoiceChannelPrecondition",
 		"SameVoiceChannelPrecondition",
+		"DJPrecondition",
 	],
 })
 export class PlayNextCommand extends Command {
@@ -110,6 +111,9 @@ export class PlayNextCommand extends Command {
 			const { loadType, tracks, playlistInfo } = resolve;
 
 			if (loadType === "playlist") {
+				for (const track of tracks) {
+					track.info.requester = interaction.user;
+				}
 				player.queue.splice(0, 0, ...tracks);
 
 				await interaction.editReply({

@@ -40,6 +40,7 @@ import type { Track } from "riffy";
 	preconditions: [
 		"InVoiceChannelPrecondition",
 		"SameVoiceChannelPrecondition",
+		"DJPrecondition",
 	],
 })
 export class PlayCommand extends Command {
@@ -108,6 +109,7 @@ export class PlayCommand extends Command {
 
 			if (loadType === "playlist") {
 				for (const track of tracks) {
+					track.info.requester = interaction.user;
 					player.queue.add(track);
 				}
 
@@ -162,7 +164,7 @@ export class PlayCommand extends Command {
 		}
 
 		// Search with selection menu
-		let resolve = await riffy.resolve({
+		const resolve = await riffy.resolve({
 			query,
 			source: currentSource,
 			requester: interaction.user,

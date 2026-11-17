@@ -34,6 +34,7 @@ import { MessageFlags } from "discord.js";
 		"HasActivePlayerPrecondition",
 		"InVoiceChannelPrecondition",
 		"SameVoiceChannelPrecondition",
+		"DJPrecondition",
 	],
 })
 export class VolumeCommand extends Command {

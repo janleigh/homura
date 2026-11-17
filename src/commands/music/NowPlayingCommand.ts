@@ -27,6 +27,12 @@ import {
 	Command,
 	RegisterBehavior,
 } from "@sapphire/framework";
+import { parsers } from "@utils/index";
+import {
+	canRunMusicCommand,
+	clearSkipVotes,
+	handleSkipAction,
+} from "@utils/permissions";
 import { ComponentType, MessageFlags } from "discord.js";
 
 @ApplyOptions<Command.Options>({
@@ -38,6 +44,7 @@ import { ComponentType, MessageFlags } from "discord.js";
 	preconditions: [
 		"HasActivePlayerPrecondition",
 		"HasPlayingTrackPrecondition",
+		"DJPrecondition",
 	],
 })
 export class NowPlayingCommand extends Command {
@@ -77,13 +84,15 @@ export class NowPlayingCommand extends Command {
 		});
 
 		collector.on("collect", async (i) => {
+			if (!i.guild) return;
+
 			const member =
-				i.guild?.members.cache.get(i.user.id) ??
-				(await i.guild?.members.fetch(i.user.id).catch(() => null));
+				i.guild.members.cache.get(i.user.id) ??
+				(await i.guild.members.fetch(i.user.id).catch(() => null));
 			const botVoiceId =
 				(
-					i.guild?.members.me ??
-					(await i.guild?.members.fetchMe().catch(() => null))
+					i.guild.members.me ??
+					(await i.guild.members.fetchMe().catch(() => null))
 				)?.voice.channelId ?? player.voiceChannel;
 
 			if (
@@ -102,7 +111,33 @@ export class NowPlayingCommand extends Command {
 				return;
 			}
 
+			const config = this.container.client.db.getGuildConfig(i.guild.id);
+			const crossmark = parsers.getEmoji("crossmark")?.toString() ?? "🔒";
+
 			if (i.customId === "np_play_pause") {
+				if (
+					!canRunMusicCommand(
+						member,
+						i.guild,
+						config,
+						"playback",
+						botVoiceId,
+					)
+				) {
+					await i.reply({
+						components: [
+							createMusicStatusContainer(
+								"You need a DJ role or Manage Server permission to control playback.",
+								crossmark,
+							),
+						],
+						flags:
+							MessageFlags.Ephemeral |
+							MessageFlags.IsComponentsV2,
+					});
+					return;
+				}
+
 				const shouldPause = !player.paused;
 				player.pause(shouldPause);
 				player.playing = !shouldPause;
@@ -117,19 +152,87 @@ export class NowPlayingCommand extends Command {
 			} else if (i.customId === "np_skip") {
 				const currentTitle =
 					player.current?.info.title ?? "Current track";
-				player.stop();
-
-				await i.reply({
-					components: [
-						createMusicStatusContainer(
-							`Skipped **${currentTitle}** by ${i.user}.`,
-							"⏭️",
-						),
-					],
-					flags: MessageFlags.IsComponentsV2,
+				const result = handleSkipAction({
+					client: this.container.client,
+					guild: i.guild,
+					member,
+					player,
 				});
-				collector.stop();
+
+				if (result.status === "skipped") {
+					await i.reply({
+						components: [
+							createMusicStatusContainer(
+								`Skipped **${currentTitle}** by ${i.user}.`,
+								"⏭️",
+							),
+						],
+						flags: MessageFlags.IsComponentsV2,
+					});
+					collector.stop();
+				} else if (result.status === "vote_passed") {
+					const checkmark =
+						parsers.getEmoji("checkmark")?.toString() ?? "⏭️";
+					await i.reply({
+						components: [
+							createMusicStatusContainer(
+								`Vote skip passed (**${result.votes}/${result.required}**)! Skipped **${currentTitle}**.`,
+								checkmark,
+							),
+						],
+						flags: MessageFlags.IsComponentsV2,
+					});
+					collector.stop();
+				} else if (result.status === "already_voted") {
+					await i.reply({
+						components: [
+							createMusicStatusContainer(
+								`You have already voted to skip this track (**${result.votes}/${result.required}** votes).`,
+								crossmark,
+							),
+						],
+						flags:
+							MessageFlags.Ephemeral |
+							MessageFlags.IsComponentsV2,
+					});
+				} else {
+					const greytick =
+						parsers.getEmoji("greytick")?.toString() ?? "🗳️";
+					await i.reply({
+						components: [
+							createMusicStatusContainer(
+								`Voted to skip **${currentTitle}** (**${result.votes}/${result.required}** votes needed).`,
+								greytick,
+							),
+						],
+						flags: MessageFlags.IsComponentsV2,
+					});
+				}
 			} else if (i.customId === "np_stop") {
+				if (
+					!canRunMusicCommand(
+						member,
+						i.guild,
+						config,
+						"destroy",
+						botVoiceId,
+					)
+				) {
+					await i.reply({
+						components: [
+							createMusicStatusContainer(
+								"You need a DJ role or Manage Server permission to stop the player.",
+								crossmark,
+							),
+						],
+						flags:
+							MessageFlags.Ephemeral |
+							MessageFlags.IsComponentsV2,
+					});
+					return;
+				}
+
+				clearSkipVotes(this.container.client, i.guild.id);
 				player.destroy();
 
 				await i.update({

@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import { DatabaseManager } from "@lib/database";
 import { SapphireClient } from "@sapphire/framework";
 import { Riffy } from "riffy";
 
@@ -27,8 +28,23 @@ export class BaseClient extends SapphireClient {
 	 */
 	public riffy: Riffy;
 
+	/**
+	 * @description The SQLite database manager for server configurations.
+	 * @type {DatabaseManager}
+	 */
+	public db: DatabaseManager;
+
+	/**
+	 * @description Active track skip votes per guild.
+	 * @type {Map<string, Set<string>>}
+	 */
+	public skipVotes: Map<string, Set<string>>;
+
 	public constructor() {
 		super(CLIENT_OPTIONS);
+
+		this.db = new DatabaseManager();
+		this.skipVotes = new Map();
 
 		this.riffy = new Riffy(this, LAVALINK_NODES, {
 			send: (pl) => {
@@ -58,6 +74,7 @@ export class BaseClient extends SapphireClient {
 	 * @description Destroys the client.
 	 */
 	public override destroy() {
+		this.db.close();
 		return super.destroy();
 	}
 }

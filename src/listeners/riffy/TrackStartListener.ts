@@ -19,6 +19,7 @@ import { createTrackStartContainer } from "@commandUtils/music/nowplaying";
 import type { BaseClient } from "@lib/BaseClient";
 import { ApplyOptions } from "@sapphire/decorators";
 import { Listener, container } from "@sapphire/framework";
+import { clearSkipVotes } from "@utils/permissions";
 import { MessageFlags, type TextChannel } from "discord.js";
 import { Player, Track } from "riffy";
 
@@ -31,6 +32,8 @@ import { LAVALINK_EVENTS } from "@/config";
 export class TrackStartListener extends Listener {
 	public async run(player: Player, track: Track) {
 		const client = this.container.client as BaseClient;
+		clearSkipVotes(client, player.guildId);
+
 		const channel = client.channels.cache.get(player.textChannel) as
 			| TextChannel
 			| undefined;

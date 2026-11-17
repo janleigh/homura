@@ -22,6 +22,8 @@ import {
 	Command,
 	RegisterBehavior,
 } from "@sapphire/framework";
+import { parsers } from "@utils/index";
+import { handleSkipAction } from "@utils/permissions";
 import { MessageFlags } from "discord.js";
 
 @ApplyOptions<Command.Options>({
@@ -33,6 +35,7 @@ import { MessageFlags } from "discord.js";
 		"HasPlayingTrackPrecondition",
 		"InVoiceChannelPrecondition",
 		"SameVoiceChannelPrecondition",
+		"DJPrecondition",
 	],
 })
 export class SkipCommand extends Command {
@@ -51,18 +54,64 @@ export class SkipCommand extends Command {
 	public async chatInputRun(
 		interaction: Command.ChatInputCommandInteraction,
 	) {
-		const player = this.container.client.riffy.players.get(
-			interaction.guildId!,
-		)!;
+		const guild = interaction.guild!;
+		const member =
+			guild.members.cache.get(interaction.user.id) ??
+			(await guild.members.fetch(interaction.user.id));
+		const player = this.container.client.riffy.players.get(guild.id)!;
 		const track = player.current!;
+		const trackLink = track.info.uri
+			? `[${track.info.title}](${track.info.uri})`
+			: `**${track.info.title}**`;
 
-		player.stop();
+		const result = handleSkipAction({
+			client: this.container.client,
+			guild,
+			member,
+			player,
+		});
 
+		if (result.status === "skipped") {
+			return interaction.reply({
+				components: [
+					createMusicStatusContainer(`Skipped ${trackLink}`, "⏭️"),
+				],
+				flags: MessageFlags.IsComponentsV2,
+			});
+		}
+
+		if (result.status === "vote_passed") {
+			const checkmark = parsers.getEmoji("checkmark")?.toString() ?? "⏭️";
+			return interaction.reply({
+				components: [
+					createMusicStatusContainer(
+						`Vote skip passed (**${result.votes}/${result.required}**)! Skipped ${trackLink}`,
+						checkmark,
+					),
+				],
+				flags: MessageFlags.IsComponentsV2,
+			});
+		}
+
+		if (result.status === "already_voted") {
+			const crossmark = parsers.getEmoji("crossmark")?.toString() ?? "⚠️";
+			return interaction.reply({
+				components: [
+					createMusicStatusContainer(
+						`You have already voted to skip this track (**${result.votes}/${result.required}** votes).`,
+						crossmark,
+					),
+				],
+				flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2,
+			});
+		}
+
+		const greytick = parsers.getEmoji("greytick")?.toString() ?? "🗳️";
 		return interaction.reply({
 			components: [
 				createMusicStatusContainer(
-					`Skipped [${track.info.title}](${track.info.uri})`,
-					"⏭️",
+					`Voted to skip ${trackLink} (**${result.votes}/${result.required}** votes needed).`,
+					greytick,
 				),
 			],
 			flags: MessageFlags.IsComponentsV2,

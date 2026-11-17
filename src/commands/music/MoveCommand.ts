@@ -37,6 +37,7 @@ import type { Track } from "riffy";
 		"HasActivePlayerPrecondition",
 		"InVoiceChannelPrecondition",
 		"SameVoiceChannelPrecondition",
+		"DJPrecondition",
 	],
 })
 export class MoveCommand extends Command {

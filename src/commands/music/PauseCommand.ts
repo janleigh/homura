@@ -33,6 +33,7 @@ import { MessageFlags } from "discord.js";
 		"HasPlayingTrackPrecondition",
 		"InVoiceChannelPrecondition",
 		"SameVoiceChannelPrecondition",
+		"DJPrecondition",
 	],
 })
 export class PauseCommand extends Command {

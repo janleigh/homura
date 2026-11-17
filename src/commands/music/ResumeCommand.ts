@@ -32,6 +32,7 @@ import { MessageFlags } from "discord.js";
 		"HasActivePlayerPrecondition",
 		"InVoiceChannelPrecondition",
 		"SameVoiceChannelPrecondition",
+		"DJPrecondition",
 	],
 })
 export class ResumeCommand extends Command {

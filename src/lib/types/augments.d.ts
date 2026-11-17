@@ -15,6 +15,8 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import type { BaseClient } from "@lib/BaseClient";
+import type { DatabaseManager } from "@lib/database";
 import { Riffy } from "riffy";
 
 export declare global {
@@ -33,9 +35,12 @@ declare module "@sapphire/framework" {
 		SameVoiceChannelPrecondition: never;
 		HasActivePlayerPrecondition: never;
 		HasPlayingTrackPrecondition: never;
+		DJPrecondition: never;
 	}
 	interface SapphireClient {
 		riffy: Riffy;
+		db: DatabaseManager;
+		skipVotes: Map<string, Set<string>>;
 	}
 }
 

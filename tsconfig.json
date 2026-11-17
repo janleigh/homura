@@ -20,7 +20,9 @@
 			"@components/*": ["./src/lib/components/*"],
 			"@utils/*": ["./src/lib/utils/*"],
 			"@commandUtils/*": ["./src/lib/utils/commands/*"]
-		}
+		},
+
+		"types": ["bun"]
 	},
 	"exclude": [".git/", ".github/", ".vscode/", "build/"],
 	"include": ["src/**/*", "scripts", "src/listeners/riffy"]

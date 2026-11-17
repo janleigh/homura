@@ -19,7 +19,6 @@ import { EMOJI_IDS } from "@/config";
 
 export const CrossMarkEmoji = EMOJI_IDS.crossmark!;
 export const CheckmarkEmoji = EMOJI_IDS.checkmark!;
-export const InfoEmoji = EMOJI_IDS.info!;
-export const TypingEmoji = EMOJI_IDS.typing!;
+export const GreyTickEmoji = EMOJI_IDS.greytick!;
 
-export type EmojiName = "checkmark" | "crossmark" | "info" | "typing";
+export type EmojiName = "checkmark" | "crossmark" | "greytick";

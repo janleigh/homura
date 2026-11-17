@@ -19,6 +19,7 @@ import { createQueueEndContainer } from "@commandUtils/music/queue";
 import type { BaseClient } from "@lib/BaseClient";
 import { ApplyOptions } from "@sapphire/decorators";
 import { Listener, container } from "@sapphire/framework";
+import { clearSkipVotes } from "@utils/permissions";
 import { MessageFlags, type TextChannel } from "discord.js";
 import { Player } from "riffy";
 
@@ -31,6 +32,8 @@ import { LAVALINK_EVENTS } from "@/config";
 export class QueueEndListener extends Listener {
 	public async run(player: Player) {
 		const client = this.container.client as BaseClient;
+		clearSkipVotes(client, player.guildId);
+
 		const channel = client.channels.cache.get(player.textChannel) as
 			| TextChannel
 			| undefined;

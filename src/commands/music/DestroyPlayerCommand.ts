@@ -22,6 +22,7 @@ import {
 	Command,
 	RegisterBehavior,
 } from "@sapphire/framework";
+import { clearSkipVotes } from "@utils/permissions";
 import { MessageFlags } from "discord.js";
 
 @ApplyOptions<Command.Options>({
@@ -32,8 +33,8 @@ import { MessageFlags } from "discord.js";
 		"HasActivePlayerPrecondition",
 		"InVoiceChannelPrecondition",
 		"SameVoiceChannelPrecondition",
+		"DJPrecondition",
 	],
-	requiredUserPermissions: ["ManageChannels"],
 })
 export class DestroyPlayerCommand extends Command {
 	public override registerApplicationCommands(
@@ -55,6 +56,7 @@ export class DestroyPlayerCommand extends Command {
 			interaction.guildId!,
 		)!;
 
+		clearSkipVotes(this.container.client, interaction.guildId!);
 		player.destroy();
 
 		return interaction.reply({

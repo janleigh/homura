@@ -9,16 +9,25 @@
 !.yarn/versions
 
 # Directories
-build/*
+build/
+data/
 node_modules/
-node_modules/*
+tests/
 
 # Files
 .env
+*.db
+*.db-shm
+*.db-wal
 public/*
 !public/README.md
 
-# Agents
+# agentic 
+# heresyyy!! but damn cant let the free gemini pro go to waste
 .agents/
-docs/superpowers
+.claude/
+.gemini/
 .superpowers/
+docs/superpowers
+CLAUDE.md
+GEMINI.md

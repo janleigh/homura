@@ -29,6 +29,8 @@ import {
 	Command,
 	RegisterBehavior,
 } from "@sapphire/framework";
+import { parsers } from "@utils/index";
+import { getRequesterId, isMemberDJ } from "@utils/permissions";
 import { MessageFlags } from "discord.js";
 import type { Track } from "riffy";
 
@@ -37,7 +39,7 @@ import type { Track } from "riffy";
 	description: "Display the current music queue",
 	aliases: ["q"],
 	fullCategory: ["Music"],
-	preconditions: ["HasActivePlayerPrecondition"],
+	preconditions: ["HasActivePlayerPrecondition", "DJPrecondition"],
 })
 export class QueueCommand extends Command {
 	public override registerApplicationCommands(
@@ -142,6 +144,50 @@ export class QueueCommand extends Command {
 			) {
 				const trackPosition = parseInt(i.values[0], 10);
 				if (isNaN(trackPosition)) return;
+
+				const currentQueue = Array.from(player.queue) as Track[];
+				const targetTrack = currentQueue[trackPosition - 1];
+
+				if (i.guild && targetTrack) {
+					const config = this.container.client.db.getGuildConfig(
+						i.guild.id,
+					);
+					if (
+						config.djEnabled &&
+						config.djCommands.includes("remove") &&
+						getRequesterId(targetTrack) !== i.user.id
+					) {
+						const member =
+							i.guild.members.cache.get(i.user.id) ??
+							(await i.guild.members
+								.fetch(i.user.id)
+								.catch(() => null));
+						const botVoiceId =
+							i.guild.members.me?.voice.channelId ??
+							player.voiceChannel;
+
+						if (
+							!member ||
+							!isMemberDJ(member, i.guild, config, botVoiceId)
+						) {
+							const crossmark =
+								parsers.getEmoji("crossmark")?.toString() ??
+								"🔒";
+							await i.reply({
+								components: [
+									createMusicStatusContainer(
+										"You need a DJ role or Manage Server permission to remove tracks requested by others.",
+										crossmark,
+									),
+								],
+								flags:
+									MessageFlags.Ephemeral |
+									MessageFlags.IsComponentsV2,
+							});
+							return;
+						}
+					}
+				}
 
 				const removed = removeTracks(
 					player.queue as unknown as Track[],

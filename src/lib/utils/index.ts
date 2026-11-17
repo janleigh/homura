@@ -18,4 +18,5 @@
 export * as commands from "./commands";
 export * as components from "./components";
 export * as parsers from "./common/parsers";
+export * as permissions from "./permissions";
 export * as text from "./common/text";
