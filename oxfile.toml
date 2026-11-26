@@ -1,0 +1,16 @@
+
+version = 1
+
+[[apps]]
+name = "homura"
+command = "bun run start"
+restart_policy = "always"
+
+watch = ["src", "package.json"]
+ignore_watch = [
+    "node_modules/",
+    ".git/",
+    "dist/",
+    ".log$"
+]
+watch_delay_secs = 1
