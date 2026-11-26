@@ -3,6 +3,7 @@ version = 1
 
 [[apps]]
 name = "homura"
+cwd = "."
 command = "bun run start"
 restart_policy = "always"
 
