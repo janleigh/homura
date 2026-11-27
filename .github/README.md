@@ -63,11 +63,28 @@ this readme sucks
    cp .env.example .env
    ```
 
-   Edit `.env` and add your Discord bot token:
+   Edit `.env` and set your Discord token and Lavalink connection details:
 
    ```env
    DISCORD_TOKEN="your-bot-token-here"
+   LAVALINK_HOST="localhost"
+   LAVALINK_PORT="2333"
+   LAVALINK_PASSWORD="youshallnotpass"
+   LAVALINK_SECURE="false"
    ```
+
+   The Lavalink node must be reachable by the bot. To allow larger YouTube
+   playlists, configure `youtubePlaylistLoadLimit` in the node's
+   `application.yml` under `lavalink.server`:
+
+   ```yaml
+   lavalink:
+     server:
+       youtubePlaylistLoadLimit: 50 # pages of 100 tracks each
+   ```
+
+   Increase this value to cover the largest playlist you expect to load, then
+   restart Lavalink. Public Lavalink nodes control this setting themselves.
 
 5. **Configure bot settings (optional)**
 

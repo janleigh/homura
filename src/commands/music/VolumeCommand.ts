@@ -25,6 +25,8 @@ import {
 import { parsers } from "@utils/index";
 import { MessageFlags } from "discord.js";
 
+import { MUSIC_CONFIG } from "@/config";
+
 @ApplyOptions<Command.Options>({
 	name: "volume",
 	description: "Check or adjust the playback volume",
@@ -50,10 +52,10 @@ export class VolumeCommand extends Command {
 						option
 							.setName("level")
 							.setDescription(
-								"The volume percentage to set (0 - 150%)",
+								`The volume percentage to set (0 - ${MUSIC_CONFIG.maxVolume}%)`,
 							)
 							.setMinValue(0)
-							.setMaxValue(150)
+							.setMaxValue(MUSIC_CONFIG.maxVolume)
 							.setRequired(false),
 					),
 			{ behaviorWhenNotIdentical: RegisterBehavior.Overwrite },
@@ -76,7 +78,7 @@ export class VolumeCommand extends Command {
 			return interaction.reply({
 				components: [
 					createMusicStatusContainer(
-						`The current playback volume is **${player.volume}%**.\n\n${parsers.createProgressBar(player.volume, 150, 12)}`,
+						`The current playback volume is **${player.volume}%**.\n\n${parsers.createProgressBar(player.volume, MUSIC_CONFIG.maxVolume, 12)}`,
 						volumeEmoji,
 					),
 				],
@@ -92,7 +94,7 @@ export class VolumeCommand extends Command {
 		return interaction.reply({
 			components: [
 				createMusicStatusContainer(
-					`Volume changed from **${oldVolume}%** to **${level}%**.\n\n${parsers.createProgressBar(level, 150, 12)}`,
+					`Volume changed from **${oldVolume}%** to **${level}%**.\n\n${parsers.createProgressBar(level, MUSIC_CONFIG.maxVolume, 12)}`,
 					volumeEmoji,
 				),
 			],

@@ -74,7 +74,7 @@ export class QueueCommand extends Command {
 			});
 		}
 
-		const iterator = new QueueIterator(queueItems, 10);
+		const iterator = new QueueIterator(queueItems);
 		const initialRows = [];
 		if (iterator.totalPages > 1) {
 			initialRows.push(createQueueRow(iterator));

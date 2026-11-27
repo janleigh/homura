@@ -25,6 +25,8 @@ import {
 } from "discord.js";
 import type { Player, Track } from "riffy";
 
+import { MUSIC_CONFIG } from "@/config";
+
 export interface SkipActionResult {
 	status: "skipped" | "vote_passed" | "voted" | "already_voted";
 	votes: number;
@@ -106,7 +108,10 @@ export function clearSkipVotes(client: BaseClient, guildId: string): void {
 }
 
 function getRequiredSkipVotes(activeListenerCount: number): number {
-	return Math.max(1, Math.ceil(activeListenerCount * 0.5));
+	return Math.max(
+		1,
+		Math.ceil(activeListenerCount * MUSIC_CONFIG.voteSkipThreshold),
+	);
 }
 
 function pruneStaleSkipVotes(

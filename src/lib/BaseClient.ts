@@ -19,7 +19,7 @@ import { DatabaseManager } from "@lib/database";
 import { SapphireClient } from "@sapphire/framework";
 import { Riffy } from "riffy";
 
-import { CLIENT_OPTIONS, LAVALINK_NODES } from "../config";
+import { CLIENT_OPTIONS, LAVALINK_NODES, MUSIC_CONFIG } from "../config";
 
 export class BaseClient extends SapphireClient {
 	/**
@@ -51,8 +51,7 @@ export class BaseClient extends SapphireClient {
 				const g = this.guilds.cache.get(pl.d.guild_id);
 				if (g) g.shard.send(pl);
 			},
-			// TODO: Make this confgurable
-			defaultSearchPlatform: "ytsearch",
+			defaultSearchPlatform: MUSIC_CONFIG.defaultSearchPlatform,
 			restVersion: "v4",
 			bypassChecks: {
 				nodeFetchInfo: true,

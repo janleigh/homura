@@ -25,21 +25,18 @@ import {
 import { parsers } from "@utils/index";
 import type { Track } from "riffy";
 
+import { MUSIC_CONFIG, MUSIC_SOURCES, type MusicSearchSource } from "@/config";
+
 import { createMusicStatusContainer } from "./status";
 
-export { createMusicStatusContainer };
-
-export const SUPPORTED_SOURCES = [
-	{ label: "YouTube Music", value: "ytmsearch", emoji: "🎵" },
-	{ label: "YouTube", value: "ytsearch", emoji: "▶️" },
-	{ label: "Spotify", value: "spsearch", emoji: "🟢" },
-	{ label: "SoundCloud", value: "scsearch", emoji: "☁️" },
-] as const;
-
-export type MusicSearchSource = (typeof SUPPORTED_SOURCES)[number]["value"];
+export {
+	createMusicStatusContainer,
+	MUSIC_SOURCES as SUPPORTED_SOURCES,
+	type MusicSearchSource,
+};
 
 export function getSourceName(source: string): string {
-	const found = SUPPORTED_SOURCES.find((s) => s.value === source);
+	const found = MUSIC_SOURCES.find((s) => s.value === source);
 	return found ? found.label : source;
 }
 
@@ -93,22 +90,22 @@ export function createTrackSelectRow(
 		.setCustomId("play_track_select")
 		.setPlaceholder("Choose a track to play...")
 		.addOptions(
-			tracks.slice(0, 10).map((track, index) => {
-				const title =
-					track.info.title.length > 95
-						? `${track.info.title.slice(0, 95)}...`
-						: track.info.title;
-				const duration = parsers.formatDuration(track.info.length);
-				const description = `${track.info.author} • ${duration}`.slice(
-					0,
-					100,
-				);
+			tracks
+				.slice(0, MUSIC_CONFIG.searchResultLimit)
+				.map((track, index) => {
+					const title =
+						track.info.title.length > 95
+							? `${track.info.title.slice(0, 95)}...`
+							: track.info.title;
+					const duration = parsers.formatDuration(track.info.length);
+					const description =
+						`${track.info.author} • ${duration}`.slice(0, 100);
 
-				return new SelectMenuOptionBuilder()
-					.setLabel(title)
-					.setDescription(description)
-					.setValue(String(index));
-			}),
+					return new SelectMenuOptionBuilder()
+						.setLabel(title)
+						.setDescription(description)
+						.setValue(String(index));
+				}),
 		);
 
 	return new ActionRowBuilder<SelectMenuBuilder>().addComponents(selectMenu);
@@ -121,7 +118,7 @@ export function createSourceSelectRow(
 		.setCustomId("play_source_select")
 		.setPlaceholder("Switch search source...")
 		.addOptions(
-			SUPPORTED_SOURCES.map((source) =>
+			MUSIC_SOURCES.map((source) =>
 				new SelectMenuOptionBuilder()
 					.setLabel(source.label)
 					.setValue(source.value)

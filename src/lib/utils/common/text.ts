@@ -17,6 +17,8 @@
 
 import { inspect } from "node:util";
 
+import { env } from "@/env";
+
 /**
  * Cleans a string by removing sensitive information and formatting issues.
  * @param {string} [text] The text to clean.
@@ -30,7 +32,7 @@ export const clean = (text: string) => {
 	text = text
 		.replace(/`/g, `\`${String.fromCharCode(8203)}`)
 		.replace(/@/g, `@${String.fromCharCode(8203)}`)
-		.replace(process.env.DISCORD_TOKEN, "<TOKEN>");
+		.replace(env.DISCORD_TOKEN, "<TOKEN>");
 	return text;
 };
 

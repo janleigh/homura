@@ -19,6 +19,8 @@ import { Database } from "bun:sqlite";
 import { mkdirSync } from "node:fs";
 import { dirname } from "node:path";
 
+import { z } from "zod";
+
 export const MUSIC_COMMANDS = [
 	"destroy",
 	"loop",
@@ -67,6 +69,7 @@ interface GuildConfigRow {
 }
 
 const DEFAULT_DJ_COMMANDS_JSON = JSON.stringify(DEFAULT_DJ_COMMANDS);
+const stringArraySchema = z.array(z.string());
 
 export class DatabaseManager {
 	private readonly db: Database;
@@ -213,12 +216,9 @@ export class DatabaseManager {
 
 	private parseStringArray(raw: string, fallback: string[]): string[] {
 		try {
-			const parsed: unknown = JSON.parse(raw);
-			if (
-				Array.isArray(parsed) &&
-				parsed.every((item) => typeof item === "string")
-			) {
-				return parsed;
+			const result = stringArraySchema.safeParse(JSON.parse(raw));
+			if (result.success) {
+				return result.data;
 			}
 		} catch {
 			// Fall back to default array on malformed JSON

@@ -33,6 +33,8 @@ import {
 import { ComponentType, MessageFlags } from "discord.js";
 import type { Track } from "riffy";
 
+import { MUSIC_CONFIG } from "@/config";
+
 @ApplyOptions<Command.Options>({
 	name: "playnext",
 	description: "Play a track or playlist next in the queue",
@@ -90,7 +92,8 @@ export class PlayNextCommand extends Command {
 		await interaction.deferReply();
 		const query = interaction.options.getString("query", true);
 		let currentSource =
-			interaction.options.getString("source") ?? "ytmsearch";
+			interaction.options.getString("source") ??
+			MUSIC_CONFIG.defaultSearchPlatform;
 
 		const player = riffy.createConnection({
 			guildId: interaction.guild!.id,

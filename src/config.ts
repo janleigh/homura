@@ -23,6 +23,8 @@ import {
 	type PresenceData,
 } from "discord.js";
 
+import { env } from "@/env";
+
 /**
  * @description The dev server IDs. The only places where developer commands will be registered.
  * @type {string[]}
@@ -66,10 +68,7 @@ export const CLIENT_OPTIONS: ClientOptions = {
 	loadMessageCommandListeners: true,
 	enableLoaderTraceLoggings: true,
 	logger: {
-		level:
-			process.env.NODE_ENV === "production"
-				? LogLevel.Info
-				: LogLevel.Debug,
+		level: env.NODE_ENV === "production" ? LogLevel.Info : LogLevel.Debug,
 	},
 };
 
@@ -88,15 +87,15 @@ export const PRESENCE_OPTIONS: PresenceData = {
 };
 
 /**
- * @description The lavalink nodes to be used by the bot.
- * Check here for free nodes: https://riffy.js.org/resources
+ * @description The Lavalink nodes to be used by the bot.
+ * Configure youtubePlaylistLoadLimit on a self-hosted node to load larger playlists.
  */
 export const LAVALINK_NODES = [
 	{
-		host: "lava-v4.ajieblogs.eu.org",
-		port: 80,
-		password: "https://dsc.gg/ajidevserver",
-		secure: false,
+		host: env.LAVALINK_HOST,
+		port: env.LAVALINK_PORT,
+		password: env.LAVALINK_PASSWORD,
+		secure: env.LAVALINK_SECURE,
 	},
 ];
 
@@ -118,4 +117,27 @@ export const EMOJI_IDS: Record<string, string> = {
 export const LAVALINK_EVENTS: Record<string, boolean> = {
 	queueEnd: true,
 	trackStart: false,
+};
+
+/**
+ * @description Supported music search sources for Riffy and play commands.
+ */
+export const MUSIC_SOURCES = [
+	{ label: "YouTube Music", value: "ytmsearch", emoji: "🎵" },
+	{ label: "YouTube", value: "ytsearch", emoji: "▶️" },
+	{ label: "Spotify", value: "spsearch", emoji: "🟢" },
+	{ label: "SoundCloud", value: "scsearch", emoji: "☁️" },
+] as const;
+
+export type MusicSearchSource = (typeof MUSIC_SOURCES)[number]["value"];
+
+/**
+ * @description Music playback, search, and pagination defaults.
+ */
+export const MUSIC_CONFIG = {
+	defaultSearchPlatform: "ytmsearch" as MusicSearchSource,
+	maxVolume: 150,
+	voteSkipThreshold: 0.5,
+	queuePageSize: 10,
+	searchResultLimit: 10,
 };

@@ -28,6 +28,8 @@ import { parsers } from "@utils/index";
 import { ButtonStyle } from "discord.js";
 import type { Player, Track } from "riffy";
 
+import { MUSIC_CONFIG } from "@/config";
+
 import { createMusicStatusContainer } from "./status";
 
 export { createMusicStatusContainer };
@@ -51,7 +53,7 @@ export class QueueIterator implements Iterator<Track[]> {
 	public readonly pageSize: number;
 	private currentIndex = 0;
 
-	constructor(items: Track[], pageSize: number = 10) {
+	constructor(items: Track[], pageSize: number = MUSIC_CONFIG.queuePageSize) {
 		this.items = items;
 		this.pageSize = pageSize;
 	}
