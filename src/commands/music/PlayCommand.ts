@@ -23,6 +23,7 @@ import {
 	createTrackSelectRow,
 	getDefaultSearchPlatform,
 	getSourceName,
+	resolveDirectUrl,
 	SUPPORTED_SOURCES,
 } from "@commandUtils/music/play";
 import { ApplyOptions } from "@sapphire/decorators";
@@ -102,10 +103,11 @@ export class PlayCommand extends Command {
 			query.startsWith("http://") || query.startsWith("https://");
 
 		if (isDirectUrl) {
-			const resolve = await riffy.resolve({
+			const resolve = await resolveDirectUrl(
+				riffy,
 				query,
-				requester: interaction.user,
-			});
+				interaction.user,
+			);
 
 			const { loadType, tracks, playlistInfo } = resolve;
 

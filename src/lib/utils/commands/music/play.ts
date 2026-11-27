@@ -23,7 +23,8 @@ import {
 	TextDisplayBuilder,
 } from "@discordjs/builders";
 import { parsers } from "@utils/index";
-import type { Track } from "riffy";
+import type { User } from "discord.js";
+import type { Riffy, Track } from "riffy";
 
 import {
 	ENABLED_MUSIC_SOURCES,
@@ -55,6 +56,56 @@ export function getDefaultSearchPlatform(): MusicSearchSource {
 export function getSourceName(source: string): string {
 	const found = MUSIC_SOURCES.find((s) => s.value === source);
 	return found ? found.label : source;
+}
+
+export function extractYouTubeVideoId(url: string): string | null {
+	try {
+		const parsed = new URL(url);
+		const hostname = parsed.hostname.toLowerCase();
+
+		if (hostname === "youtu.be") {
+			const id = parsed.pathname.slice(1).split("/")[0];
+			return id && /^[a-zA-Z0-9_-]+$/.test(id) ? id : null;
+		}
+
+		if (hostname === "youtube.com" || hostname.endsWith(".youtube.com")) {
+			if (parsed.pathname === "/watch") {
+				const id = parsed.searchParams.get("v");
+				return id && /^[a-zA-Z0-9_-]+$/.test(id) ? id : null;
+			}
+
+			const match = /^\/(shorts|live|embed)\/([a-zA-Z0-9_-]+)/.exec(
+				parsed.pathname,
+			);
+			if (match?.[2]) {
+				return match[2];
+			}
+		}
+
+		return null;
+	} catch {
+		return null;
+	}
+}
+
+export async function resolveDirectUrl(
+	riffy: Riffy,
+	query: string,
+	requester: User,
+) {
+	const youtubeVideoId = extractYouTubeVideoId(query);
+	if (youtubeVideoId) {
+		return riffy.resolve({
+			query: youtubeVideoId,
+			source: "ytsearch",
+			requester,
+		});
+	}
+
+	return riffy.resolve({
+		query,
+		requester,
+	});
 }
 
 export function createTrackEnqueuedContainer(options: {
