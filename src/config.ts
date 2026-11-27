@@ -119,15 +119,26 @@ export const LAVALINK_EVENTS: Record<string, boolean> = {
 	trackStart: false,
 };
 
+export interface MusicSource {
+	label: string;
+	value: string;
+	emoji: string;
+	enabled: boolean;
+}
+
 /**
  * @description Supported music search sources for Riffy and play commands.
  */
 export const MUSIC_SOURCES = [
-	{ label: "YouTube Music", value: "ytmsearch", emoji: "🎵" },
-	{ label: "YouTube", value: "ytsearch", emoji: "▶️" },
-	{ label: "Spotify", value: "spsearch", emoji: "🟢" },
-	{ label: "SoundCloud", value: "scsearch", emoji: "☁️" },
-] as const;
+	{ label: "YouTube Music", value: "ytmsearch", emoji: "🎵", enabled: true },
+	{ label: "YouTube", value: "ytsearch", emoji: "▶️", enabled: true },
+	{ label: "Spotify", value: "spsearch", emoji: "🟢", enabled: false },
+	{ label: "SoundCloud", value: "scsearch", emoji: "☁️", enabled: true },
+] as const satisfies readonly MusicSource[];
+
+export const ENABLED_MUSIC_SOURCES = MUSIC_SOURCES.filter(
+	(source) => source.enabled,
+);
 
 export type MusicSearchSource = (typeof MUSIC_SOURCES)[number]["value"];
 

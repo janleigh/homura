@@ -21,6 +21,7 @@ import {
 	createTrackEnqueuedContainer,
 	createTrackSelectContainer,
 	createTrackSelectRow,
+	getDefaultSearchPlatform,
 	getSourceName,
 	SUPPORTED_SOURCES,
 } from "@commandUtils/music/play";
@@ -32,8 +33,6 @@ import {
 } from "@sapphire/framework";
 import { ComponentType, MessageFlags } from "discord.js";
 import type { Track } from "riffy";
-
-import { MUSIC_CONFIG } from "@/config";
 
 @ApplyOptions<Command.Options>({
 	name: "playnext",
@@ -93,7 +92,7 @@ export class PlayNextCommand extends Command {
 		const query = interaction.options.getString("query", true);
 		let currentSource =
 			interaction.options.getString("source") ??
-			MUSIC_CONFIG.defaultSearchPlatform;
+			getDefaultSearchPlatform();
 
 		const player = riffy.createConnection({
 			guildId: interaction.guild!.id,
@@ -192,6 +191,7 @@ export class PlayNextCommand extends Command {
 			});
 		}
 
+		const sourceSelectRow = createSourceSelectRow(currentSource);
 		const message = await interaction.editReply({
 			components: [
 				createTrackSelectContainer(
@@ -200,7 +200,7 @@ export class PlayNextCommand extends Command {
 					currentTracks.length,
 				),
 				createTrackSelectRow(currentTracks),
-				createSourceSelectRow(currentSource),
+				...(sourceSelectRow ? [sourceSelectRow] : []),
 			],
 			flags: MessageFlags.IsComponentsV2,
 		});
@@ -276,6 +276,8 @@ export class PlayNextCommand extends Command {
 
 				currentTracks = newResolve.tracks ?? [];
 
+				const updatedSourceRow = createSourceSelectRow(currentSource);
+
 				if (currentTracks.length === 0) {
 					await interaction.editReply({
 						components: [
@@ -283,7 +285,7 @@ export class PlayNextCommand extends Command {
 								`No tracks found for **"${query}"** on **${getSourceName(currentSource)}**. Try another source.`,
 								"🔍",
 							),
-							createSourceSelectRow(currentSource),
+							...(updatedSourceRow ? [updatedSourceRow] : []),
 						],
 						flags: MessageFlags.IsComponentsV2,
 					});
@@ -296,7 +298,7 @@ export class PlayNextCommand extends Command {
 								currentTracks.length,
 							),
 							createTrackSelectRow(currentTracks),
-							createSourceSelectRow(currentSource),
+							...(updatedSourceRow ? [updatedSourceRow] : []),
 						],
 						flags: MessageFlags.IsComponentsV2,
 					});

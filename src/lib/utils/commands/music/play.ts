@@ -25,15 +25,32 @@ import {
 import { parsers } from "@utils/index";
 import type { Track } from "riffy";
 
-import { MUSIC_CONFIG, MUSIC_SOURCES, type MusicSearchSource } from "@/config";
+import {
+	ENABLED_MUSIC_SOURCES,
+	MUSIC_CONFIG,
+	MUSIC_SOURCES,
+	type MusicSearchSource,
+} from "@/config";
 
 import { createMusicStatusContainer } from "./status";
 
 export {
 	createMusicStatusContainer,
-	MUSIC_SOURCES as SUPPORTED_SOURCES,
+	ENABLED_MUSIC_SOURCES as SUPPORTED_SOURCES,
 	type MusicSearchSource,
 };
+
+export function getDefaultSearchPlatform(): MusicSearchSource {
+	const isDefaultEnabled = ENABLED_MUSIC_SOURCES.some(
+		(source) => source.value === MUSIC_CONFIG.defaultSearchPlatform,
+	);
+	if (isDefaultEnabled) {
+		return MUSIC_CONFIG.defaultSearchPlatform;
+	}
+	return (
+		ENABLED_MUSIC_SOURCES[0]?.value ?? MUSIC_CONFIG.defaultSearchPlatform
+	);
+}
 
 export function getSourceName(source: string): string {
 	const found = MUSIC_SOURCES.find((s) => s.value === source);
@@ -113,12 +130,14 @@ export function createTrackSelectRow(
 
 export function createSourceSelectRow(
 	currentSource: string,
-): ActionRowBuilder<SelectMenuBuilder> {
+): ActionRowBuilder<SelectMenuBuilder> | null {
+	if (ENABLED_MUSIC_SOURCES.length === 0) return null;
+
 	const selectMenu = new SelectMenuBuilder()
 		.setCustomId("play_source_select")
 		.setPlaceholder("Switch search source...")
 		.addOptions(
-			MUSIC_SOURCES.map((source) =>
+			ENABLED_MUSIC_SOURCES.map((source) =>
 				new SelectMenuOptionBuilder()
 					.setLabel(source.label)
 					.setValue(source.value)
